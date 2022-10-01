@@ -20,21 +20,22 @@ class HomeTableViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         loadTweet()
-        
+        print(tweetArray)
         myRefreshControl.addTarget(self, action: #selector(loadTweet), for: .valueChanged)
         
         tableView.refreshControl = myRefreshControl
+        
 
         }
     
     @objc func loadTweet(){
         
-        numberOfTweet = 20
+        numberOfTweet = 1
         
         let myUrl = "https://api.twitter.com/1.1/statuses/home_timeline.json"
         let myParams = ["count": numberOfTweet]
         
-        TwitterAPICaller.client?.getDictionariesRequest(url: myUrl, parameters: myParams, success: { (tweets: [NSDictionary]) in
+        TwitterAPICaller.client?.getDictionariesRequest(url: myUrl, parameters: myParams as [String : Any], success: { (tweets: [NSDictionary]) in
             
             //clean array before putting information in there
             
@@ -49,7 +50,8 @@ class HomeTableViewController: UITableViewController {
             self.myRefreshControl.endRefreshing()
             
         }, failure: { (Error) in
-            print("Could not retrieve tweets! YIKERS!")
+            print("Could not retrieve originally tweets!")
+            print(Error.localizedDescription)
         })
         
         
@@ -63,7 +65,7 @@ class HomeTableViewController: UITableViewController {
         cell.userNameLabel.text = user["name"] as? String
         cell.tweetContent.text = tweetArray[indexPath.row]["text"] as? String
         
-        let imageUrl = URL(string: (user["profile_image_url_htttps"] as? String)!)
+        let imageUrl = URL(string: (user["profile_image_url_https"] as? String)!)
         let data = try? Data(contentsOf: imageUrl!)
         
         if let imageData = data{
@@ -76,7 +78,7 @@ class HomeTableViewController: UITableViewController {
     func loadMoreTweets(){
     
         let myUrl = "https://api.twitter.com/1.1/statuses/home_timeline.json"
-        numberOfTweet = numberOfTweet + 20
+        numberOfTweet = numberOfTweet + 10
         let myParams = ["count": numberOfTweet]
         
         TwitterAPICaller.client?.getDictionariesRequest(url: myUrl, parameters: myParams, success: { (tweets: [NSDictionary]) in
@@ -93,7 +95,8 @@ class HomeTableViewController: UITableViewController {
             self.tableView.reloadData()
             
         }, failure: { (Error) in
-            print("Could not retrieve tweets! YIKERS!")
+            print("Could not refresh to get more tweets!")
+            print(Error.localizedDescription)
         })
     }
     
